@@ -5,29 +5,34 @@ import test1
 import test2
 import time
 from math import log10
-# import matplotlib as mpl
+from scipy import stats
 import json
 from pprint import pprint
 
 
 def test(f, A):
     trials = []
-    for _ in range(0, 3):
+    for _ in range(0, 1000):
         start = time.time()
         f.main(A)
         t = (time.time() - start)  # * 10 ** 5
         trials.append(t)
     ave = sum(trials) / len(trials)
-    return ave
+    #return ave
+    m = stats.mode(trials)
+    return m[0][0], ave
 
 
 data = json.load(open('../data/data.json'))
 
-n = 50
+n = 110
 
 result_y = []
+result1_y_ave = []
 result2_y = []
+result2_y_ave = []
 result3_y = []
+result3_y_ave = []
 result_x = [log10(x) for x in range(2, n, 1)]
 
 # file1 = open('y1', 'w')
@@ -46,17 +51,20 @@ for i in range(2, n, 1):
 
     # krishnamoorthy_menon_method
     t1 = test(matrix_inversion_cholesky, A)
-    result_y.append(log10(t1))
+    result_y.append(log10(t1[0]))
+    result1_y_ave.append(log10(t1[1]))
     #file1.write(str(t1) + "\n")
 
     # test1
     t2 = test(test1, A)
-    result2_y.append(log10(t2))
+    result2_y.append(log10(t2[0]))
+    result2_y_ave.append(log10(t2[1]))
     #file2.write(str(t2) + "\n")
 
     # test2
     t3 = test(test2, A)
-    result3_y.append(log10(t3))
+    result3_y.append(log10(t3[0]))
+    result3_y_ave.append(log10(t3[1]))
     #file3.write(str(t3) + "\n")
 
     #file4.write(str(i) + "\n")
@@ -97,13 +105,16 @@ x = result_x
 # plt.plot(x, y)
 fig, ax = plt.subplots(figsize=(10, 6))
 
-plt.plot(x, y1, 'r', label='krishnamoorthy_menon_method')  # plotting t, a separately
-plt.plot(x, y2, 'b', label='numpy.linalg.inv')  # plotting t, b separately
-plt.plot(x, y3, 'g', label='gauss_jordan_elimination')  # plotting t, c separately
+plt.plot(x, y1, 'r', label='krishnamoorthy_menon_method (Mode)')  # plotting t, a separately
+plt.plot(x,result1_y_ave, 'r--', label='krishnamoorthy_menon_method (Average)')
+plt.plot(x, y2, 'b', label='numpy.linalg.inv (Mode)')  # plotting t, b separately
+plt.plot(x,result2_y_ave, 'b--', label='numpy.linalg.inv (Average)')
+plt.plot(x, y3, 'g', label='gauss_jordan_elimination (Mode)')  # plotting t, c separately
+plt.plot(x,result3_y_ave, 'g--', label='gauss_jordan_elimination (Average)')
 # xmarks=x
 # plt.xticks(xmarks)
-plt.xlabel('size of a matrix (n)')
-plt.ylabel('time (s)')
+plt.xlabel('size of a matrix, lg(n)')
+plt.ylabel('time, lg(s)')
 # plt.title('Time and size of a matrix')
 # plt.grid(True)
 plt.legend()
